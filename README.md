@@ -1,6 +1,8 @@
 # OpenClaw
 
-These are human notes. Intended to be short.
+This README.md notes are for humans. Intended to be short.
+
+- other reference files are for both humans and agents and could be longer.
 
 ## Objective
 
