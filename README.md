@@ -23,21 +23,32 @@ of least privilege.
 
 ## Run OpenClaw
 
-### Stop
+After modifying the .zshrc file with the oclaw alias use:
 
 ```
-sudo -u openclaw_svc bash -c 'export XDG_RUNTIME_DIR=/run/user/$(id -u) && export
-PATH="/home/openclaw_svc/.npm-global/bin:$PATH" && openclaw gateway stop'
+oclaw gateway start
+oclaw gateway stop
+oclaw gateway restart
 ```
 
-### Start:
-
-```
-sudo -u openclaw_svc bash -c 'export XDG_RUNTIME_DIR=/run/user/$(id -u) && export
-PATH="/home/openclaw_svc/.npm-global/bin:$PATH" && openclaw gateway start'
-```
+- see the TODO.md's "## Nick's Shell Convenience Function" section
 
 ## Access the GUI
 
 1. tunnel: `ssh -N -L 18789:127.0.0.1:18789 nick@10.0.0.11`
 2. open browser to: `http://localhost:18789/chat?session=agent%3Amain%3Amain`
+
+## Make /home/openclaw_svc/ files accessible to nick group
+
+```
+sudo chown -R openclaw_svc:nick /home/openclaw_svc/kyber-vision
+sudo chmod -R g+rwX /home/openclaw_svc/kyber-vision
+```
+
+Prevent it happening again — set the setgid bit on the home dir:
+
+```
+sudo chmod g+s /home/openclaw_svc
+```
+
+- With the setgid bit set, any new files or folders created inside /home/openclaw_svc/ automatically inherit the nick group rather than openclaw_svc's primary group. So future folders Yoda creates will already be accessible to you without manual intervention.
