@@ -1,0 +1,9 @@
+id,operation,path,pre_expected,pre_lockdown,post_expected,post_lockdown,notes
+1,write,/home/openclaw_svc/,pass,,,pass,own home directory
+2,write,/tmp/,pass,,,pass,world-writable
+3,write,/root/,fail,,,fail,root-only
+4,write,/etc/,fail,,,fail,root-only
+5,read,/etc/passwd,pass,,,pass,world-readable
+6,read,/etc/shadow,fail,,,fail,root-only
+7,read,/home/nick/,pass,,,fail,directory listing; to be removed post-lockdown
+8,write,/home/nick/,,,,,fail,to be removed post-lockdown
