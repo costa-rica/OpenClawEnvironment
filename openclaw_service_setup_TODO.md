@@ -162,6 +162,33 @@ Then open: `http://localhost:18789/#token=<token>`
 
 ---
 
+## Nick's Shell Convenience Function
+
+- [x] Add `oclaw` function to `~/.zshrc` so gateway commands can be run without the full `sudo -u openclaw_svc bash -c '...'` boilerplate
+
+**Add to `~/.zshrc` (after the gateway is confirmed working):**
+
+```bash
+# Openclaw alias to run with openclaw_svc user
+unalias oclaw 2>/dev/null
+oclaw() {
+  sudo -u openclaw_svc bash -c '
+    export HOME=/home/openclaw_svc
+    export XDG_RUNTIME_DIR=/run/user/$(id -u)
+    export PATH="$HOME/.npm-global/bin:$PATH"
+    openclaw "$@"
+  ' -- "$@"
+}
+```
+
+Then reload: `source ~/.zshrc`
+
+Usage: `oclaw gateway start|stop|restart`
+
+**Note:** `unalias oclaw 2>/dev/null` is required to prevent a zsh parse error if the function is re-sourced while an alias of the same name is still live in the session.
+
+---
+
 ## Pre-Lockdown Testing
 
 Run openclaw interactively as `openclaw_svc` to explore behavior and establish a baseline before restrictions are applied. Repeat the same tests post-lockdown to verify results are identical (lockdown should not affect openclaw's runtime capabilities — only login access and group ownership change).
@@ -209,10 +236,12 @@ sudo -u openclaw_svc bash -c '
 
 ## Lock Down
 
-- [ ] Remove login shell from `openclaw_svc`
-- [ ] Transfer group ownership of home dir to `nick` group
-- [ ] Verify nick can read/write files under `/home/openclaw_svc/`
-- [ ] Extend permissions to any paths outside `/home/nick/` as discovered above
+- [x] Remove login shell from `openclaw_svc`
+- [x] Transfer group ownership of home dir to `nick` group
+- [x] Verify nick can read/write files under `/home/openclaw_svc/`
+- [x] Extend permissions to any paths outside `/home/nick/` as discovered above
+  - `/tmp/` — world-writable, no action needed
+  - `/home/nick/` — openclaw_svc removed from `nick` group; no longer has read access (intended)
 
 **Run as nick:**
 
@@ -253,9 +282,12 @@ sudo -u openclaw_svc bash -c 'export HOME=/home/openclaw_svc && export PATH="$HO
 
 - [ ] Confirm `openclaw_svc` can no longer log in interactively
   ```bash
-  sudo -u openclaw_svc -s
+  su - openclaw_svc
+  getent passwd openclaw_svc
   ```
-  Expected: `This account is currently not available.`
+  `su` expected: `su: Authentication failure` (no password set — auth fails before shell is reached)
+  `getent` expected: line ending in `/usr/sbin/nologin` (second layer — shell is nologin)
+  Note: `sudo -u openclaw_svc -s` bypasses nologin by using `$SHELL` from the environment — do not use it as a lockdown test.
 
 ---
 
